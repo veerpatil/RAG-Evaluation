@@ -1,0 +1,5 @@
+,context_recall,context_precision,faithfulness
+Recursive_1000_200,0.625,1.0,0.6844
+Recursive_1000_250,0.5917,1.0,0.655
+Recursive_1200_200,0.6333,1.0,0.5717
+Recursive_1200_250,0.5917,1.0,0.716

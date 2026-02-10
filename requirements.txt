@@ -1,0 +1,13 @@
+langchain
+pypdf
+chromadb
+langsmith
+langchain_community
+openai
+langchain_openai
+langchain_chroma
+langchain-classic
+ragas
+rapidfuzz
+bs4
+python-dotenv
