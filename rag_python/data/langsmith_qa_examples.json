@@ -1,0 +1,138 @@
+{
+  "dataset_name": "Q&A",
+  "source_urls": [
+    "https://lilianweng.github.io/posts/2023-06-23-agent/",
+    "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
+    "https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/"
+  ],
+  "examples": [
+    {
+      "inputs": {
+        "question": "How does the ReAct agent use self-reflection?"
+      },
+      "outputs": {
+        "answer": "ReAct integrates reasoning and acting, performing actions - such tools like Wikipedia search API - and then observing / reasoning about the tool outputs."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What are the types of biases that can arise with few-shot prompting?"
+      },
+      "outputs": {
+        "answer": "The biases that can arise with few-shot prompting include (1) Majority label bias, (2) Recency bias, and (3) Common token bias."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What are five types of adversarial attacks?"
+      },
+      "outputs": {
+        "answer": "Five types of adversarial attacks are (1) Token manipulation, (2) Gradient based attack, (3) Jailbreak prompting, (4) Human red-teaming, (5) Model red-teaming."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What are the three common types of memory in LLM-powered autonomous agents?"
+      },
+      "outputs": {
+        "answer": "LLM-powered autonomous agents commonly use short-term memory (in-context learning / prompt context), long-term memory (external vector store for retrieval over time), and sensory / external memory via tools and APIs."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What is Chain-of-Thought prompting?"
+      },
+      "outputs": {
+        "answer": "Chain-of-Thought (CoT) prompting encourages the model to generate intermediate reasoning steps before the final answer, which improves performance on complex multi-step tasks."
+      }
+    },
+    {
+      "inputs": {
+        "question": "How does Tree of Thoughts differ from standard Chain-of-Thought?"
+      },
+      "outputs": {
+        "answer": "Tree of Thoughts explores multiple reasoning paths as a tree of intermediate thoughts, with evaluation and search over alternatives, whereas standard Chain-of-Thought usually follows a single linear reasoning path."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What is self-consistency in prompting?"
+      },
+      "outputs": {
+        "answer": "Self-consistency samples multiple diverse reasoning paths for the same question and then aggregates (for example by majority vote) to select a more reliable final answer."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What is the MRKL system in agent architectures?"
+      },
+      "outputs": {
+        "answer": "MRKL (Modular Reasoning, Knowledge and Language) combines an LLM with a collection of expert modules and external tools, routing queries to the appropriate module when needed."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What problem does Toolformer aim to solve?"
+      },
+      "outputs": {
+        "answer": "Toolformer teaches language models when and how to call external tools (such as calculators or search APIs) in a self-supervised way so they can use tools during generation."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What is zero-shot prompting?"
+      },
+      "outputs": {
+        "answer": "Zero-shot prompting gives the model only a natural-language instruction or question, without providing in-context demonstrations or labeled examples."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What is few-shot prompting?"
+      },
+      "outputs": {
+        "answer": "Few-shot prompting includes a small number of input-output demonstrations in the prompt so the model can infer the task format and continue the pattern for a new query."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What is prompt injection in the context of LLM attacks?"
+      },
+      "outputs": {
+        "answer": "Prompt injection is an attack where malicious instructions are inserted into user content or external data so the model overrides the original system intent and follows the attacker's instructions instead."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What is a jailbreak prompt?"
+      },
+      "outputs": {
+        "answer": "A jailbreak prompt is an adversarial instruction designed to bypass an LLM's safety policies and elicit restricted or harmful responses that the model would normally refuse."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What are the main components of an LLM-powered autonomous agent?"
+      },
+      "outputs": {
+        "answer": "An LLM-powered autonomous agent typically combines planning (task decomposition / reasoning), memory (short-term and long-term), and tool use (actions via APIs or external environments), with the LLM as the core controller."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What is task decomposition in agent planning?"
+      },
+      "outputs": {
+        "answer": "Task decomposition breaks a complex goal into smaller, manageable subgoals or steps so the agent can plan and execute them sequentially or with intermediate reasoning."
+      }
+    },
+    {
+      "inputs": {
+        "question": "What is gradient-based adversarial attack against LLMs?"
+      },
+      "outputs": {
+        "answer": "Gradient-based attacks optimize adversarial token sequences using model gradients (for example adversarial suffixes) to maximize the likelihood of producing an undesired or unsafe response."
+      }
+    }
+  ]
+}

@@ -50,6 +50,7 @@ Hard-coded LangSmith examples cover:
 - Few-shot prompting biases
 - Types of adversarial attacks
 
+Eval Q/A pairs live in `data/langsmith_qa_examples.json` (13+ examples spanning agents, prompting, and adversarial attacks). The script loads that file at startup and syncs any missing examples into the LangSmith `Q&A` dataset.
 ## End-to-end flow
 
 ```mermaid
@@ -204,6 +205,8 @@ These are **parallel evaluation tracks**:
 ```text
 rag_python/
 ├── .env                                      # GOOGLE_API_KEY + LANGSMITH_API_KEY
+├── data/
+│   └── langsmith_qa_examples.json            # INPUT (Q/A examples + source URLs)
 ├── outputs/
 │   └── langsmith_evaluation_results.csv      # OUTPUT (local copy)
 └── rag_eval/

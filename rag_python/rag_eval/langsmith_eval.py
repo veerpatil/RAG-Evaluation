@@ -4,11 +4,16 @@ LangSmith RAG evaluation using Google Gemini (chat + embeddings).
 Required environment variables (in rag_python/.env or repo-root .env):
   - GOOGLE_API_KEY
   - LANGSMITH_API_KEY
+
+Eval examples are loaded from:
+  data/langsmith_qa_examples.json
 """
 
 from __future__ import annotations
 
+import json
 import os
+from pathlib import Path
 from typing_extensions import Annotated, TypedDict
 
 from langchain_community.document_loaders import WebBaseLoader
@@ -17,53 +22,46 @@ from langchain_google_genai import ChatGoogleGenerativeAI, GoogleGenerativeAIEmb
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langsmith import Client, traceable
 
-from rag_eval.paths import OUTPUT_DIR, ensure_dirs
+from rag_eval.paths import DATA_DIR, OUTPUT_DIR, ensure_dirs
 
 os.environ["LANGSMITH_TRACING"] = "true"
 
 CHAT_MODEL = "gemini-3.5-flash"
 EMBEDDING_MODEL = "gemini-embedding-2"
 
-URLS = [
-    "https://lilianweng.github.io/posts/2023-06-23-agent/",
-    "https://lilianweng.github.io/posts/2023-03-15-prompt-engineering/",
-    "https://lilianweng.github.io/posts/2023-10-25-adv-attack-llm/",
-]
+EXAMPLES_JSON = DATA_DIR / "langsmith_qa_examples.json"
+DEFAULT_DATASET_NAME = "Q&A"
 
-EXAMPLES = [
-    {
-        "inputs": {"question": "How does the ReAct agent use self-reflection? "},
-        "outputs": {
-            "answer": (
-                "ReAct integrates reasoning and acting, performing actions - such tools "
-                "like Wikipedia search API - and then observing / reasoning about the tool outputs."
-            )
-        },
-    },
-    {
-        "inputs": {
-            "question": "What are the types of biases that can arise with few-shot prompting?"
-        },
-        "outputs": {
-            "answer": (
-                "The biases that can arise with few-shot prompting include "
-                "(1) Majority label bias, (2) Recency bias, and (3) Common token bias."
-            )
-        },
-    },
-    {
-        "inputs": {"question": "What are five types of adversarial attacks?"},
-        "outputs": {
-            "answer": (
-                "Five types of adversarial attacks are (1) Token manipulation, "
-                "(2) Gradient based attack, (3) Jailbreak prompting, "
-                "(4) Human red-teaming, (5) Model red-teaming."
-            )
-        },
-    },
-]
 
-DATASET_NAME = "Q&A"
+def load_examples_config(path: Path = EXAMPLES_JSON) -> tuple[str, list[str], list[dict]]:
+    """Load dataset name, source URLs, and Q/A examples from JSON."""
+    if not path.exists():
+        raise FileNotFoundError(
+            f"LangSmith examples file not found: {path}\n"
+            "Expected data/langsmith_qa_examples.json"
+        )
+    with path.open("r", encoding="utf-8") as f:
+        payload = json.load(f)
+
+    examples = payload.get("examples")
+    if not isinstance(examples, list) or not examples:
+        raise ValueError(f"No examples found in {path}")
+
+    for i, example in enumerate(examples):
+        if "inputs" not in example or "outputs" not in example:
+            raise ValueError(f"Example {i} must contain 'inputs' and 'outputs'")
+        if "question" not in example["inputs"]:
+            raise ValueError(f"Example {i} inputs must contain 'question'")
+        if "answer" not in example["outputs"]:
+            raise ValueError(f"Example {i} outputs must contain 'answer'")
+
+    dataset_name = payload.get("dataset_name") or DEFAULT_DATASET_NAME
+    urls = payload.get("source_urls") or []
+    print(f"Loaded {len(examples)} LangSmith examples from {path}")
+    return dataset_name, urls, examples
+
+
+DATASET_NAME, URLS, EXAMPLES = load_examples_config()
 
 
 class CorrectnessGrade(TypedDict):
@@ -196,13 +194,44 @@ Documents:
     return rag_bot
 
 
+def _normalize_question(question: str) -> str:
+    return " ".join(question.strip().split()).lower()
+
+
 def ensure_dataset(client: Client) -> None:
+    """Create the LangSmith dataset if needed and sync any missing JSON examples."""
     if not client.has_dataset(dataset_name=DATASET_NAME):
         dataset = client.create_dataset(dataset_name=DATASET_NAME)
         client.create_examples(dataset_id=dataset.id, examples=EXAMPLES)
-        print(f"Created LangSmith dataset: {DATASET_NAME}")
+        print(f"Created LangSmith dataset '{DATASET_NAME}' with {len(EXAMPLES)} examples")
+        return
+
+    dataset = client.read_dataset(dataset_name=DATASET_NAME)
+    existing = list(client.list_examples(dataset_id=dataset.id))
+    existing_questions = {
+        _normalize_question(ex.inputs.get("question", ""))
+        for ex in existing
+        if getattr(ex, "inputs", None)
+    }
+
+    missing = [
+        example
+        for example in EXAMPLES
+        if _normalize_question(example["inputs"]["question"]) not in existing_questions
+    ]
+
+    if missing:
+        client.create_examples(dataset_id=dataset.id, examples=missing)
+        print(
+            f"Updated LangSmith dataset '{DATASET_NAME}': "
+            f"added {len(missing)} new examples "
+            f"({len(existing)} existing → {len(existing) + len(missing)} total)"
+        )
     else:
-        print(f"Using existing LangSmith dataset: {DATASET_NAME}")
+        print(
+            f"Using existing LangSmith dataset '{DATASET_NAME}' "
+            f"with {len(existing)} examples (JSON is in sync)"
+        )
 
 
 def build_evaluators():
